@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import About from '../components/About.astro';
+import Experience from '../components/Experience.astro';
+import Projects from '../components/Projects.astro';
+import Skills from '../components/Skills.astro';
+import Education from '../components/Education.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Contact from '../components/Contact.astro';
+---
+
+<Layout>
+  <div class="shell">
+    <Sidebar />
+    <main class="main">
+      <About />
+      <Experience />
+      <Projects />
+      <Skills>
+        <Education />
+      </Skills>
+      <Testimonials />
+      <Contact />
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: minmax(300px, 0.8fr) 1.2fr;
+    gap: 64px;
+  }
+  .main {
+    padding: 72px 0 0;
+    min-width: 0;
+  }
+  .main :global(.section) {
+    padding-bottom: 120px;
+    scroll-margin-top: 48px;
+  }
+  @media (max-width: 1023px) {
+    .shell {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 0 24px;
+      max-width: 760px;
+    }
+    .main {
+      padding-top: 48px;
+    }
+    .main :global(.section) {
+      padding-bottom: 88px;
+      scroll-margin-top: 76px;
+    }
+  }
+  @media (max-width: 480px) {
+    .shell {
+      padding: 0 16px;
+    }
+  }
+</style>

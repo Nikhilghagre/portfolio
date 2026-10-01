@@ -1,0 +1,55 @@
+---
+interface Props {
+  index: string;
+  title: string;
+  command?: string;
+}
+const { index, title, command } = Astro.props;
+---
+
+<header class="sh" data-reveal>
+  {command && <p class="sh__cmd mono"><span class="accent">$</span> {command}</p>}
+  <h2 class="sh__title">
+    <span class="sh__idx mono">{index}.</span>
+    {title}
+    <span class="sh__line" aria-hidden="true"></span>
+  </h2>
+</header>
+
+<style>
+  .sh {
+    margin-bottom: 36px;
+  }
+  .sh__cmd {
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  .sh__title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: clamp(24px, 2.6vw, 30px);
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--text-hi);
+    letter-spacing: -0.02em;
+  }
+  .sh__idx {
+    font-size: 0.6em;
+    font-weight: 500;
+    color: var(--green);
+  }
+  .sh__line {
+    flex: 1;
+    max-width: 260px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-hi), transparent);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1.2s var(--ease) 0.2s;
+  }
+  :global(.is-in) .sh__line {
+    transform: scaleX(1);
+  }
+</style>

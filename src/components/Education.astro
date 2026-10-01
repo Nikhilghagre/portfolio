@@ -1,0 +1,93 @@
+---
+import { education } from '../data/profile';
+import Icon from './Icon.astro';
+---
+
+<div class="edu">
+  <p class="edu__cmd mono" data-reveal><span class="accent">$</span> cat education.txt certifications.txt</p>
+  <ul class="edu__list">
+    {
+      education.map((e, i) => (
+        <li class="edu__item" data-reveal style={`--d:${i}`}>
+          <span class="edu__icon">
+            <Icon name="cap" size={20} />
+          </span>
+          <span class="edu__body">
+            <span class="edu__title">{e.title}</span>
+            <span class="edu__place">{e.place}</span>
+          </span>
+          <span class="edu__period mono">{e.period}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .edu {
+    margin-top: 56px;
+  }
+  .edu__cmd {
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 14px;
+  }
+  .edu__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .edu__item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(14, 19, 24, 0.6);
+    transition: border-color 0.3s;
+  }
+  .edu__item:hover {
+    border-color: var(--border-hi);
+  }
+  .edu__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(74, 222, 128, 0.08);
+    color: var(--green);
+    flex-shrink: 0;
+  }
+  .edu__body {
+    flex: 1;
+    min-width: 0;
+  }
+  .edu__title {
+    display: block;
+    color: var(--text-hi);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .edu__place {
+    display: block;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .edu__period {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  @media (max-width: 520px) {
+    .edu__item {
+      flex-wrap: wrap;
+    }
+    .edu__period {
+      width: 100%;
+      padding-left: 56px;
+    }
+  }
+</style>

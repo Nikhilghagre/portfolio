@@ -1,0 +1,93 @@
+---
+import { skills } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section id="skills" class="section">
+  <SectionHeading index="04" title="Skills & tools" command="cat stack.yaml" />
+
+  <div class="skills">
+    {
+      skills.map((g, i) => (
+        <div class="group" data-reveal style={`--d:${i % 3}`}>
+          <h3 class="group__name mono">
+            <span class="accent">{g.group.toLowerCase().replace(/[^a-z]+/g, '_')}</span>
+            <span class="muted">:</span>
+          </h3>
+          <ul class="group__items">
+            {g.items.map((s, j) => (
+              <li class="skill mono" style={`--j:${j}`}>
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <slot />
+</section>
+
+<style>
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .group {
+    padding: 20px;
+    border-radius: var(--radius);
+    background: rgba(14, 19, 24, 0.6);
+    border: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+  .group:hover {
+    border-color: var(--border-hi);
+  }
+  .group__name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .group__items {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .skill {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: default;
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition:
+      opacity 0.5s var(--ease),
+      transform 0.5s var(--ease),
+      color 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s;
+    transition-delay: calc(var(--j) * 60ms + 200ms), calc(var(--j) * 60ms + 200ms), 0s, 0s, 0s;
+  }
+  .group.is-in .skill {
+    opacity: 1;
+    transform: none;
+  }
+  .skill:hover {
+    color: var(--green);
+    border-color: rgba(74, 222, 128, 0.4);
+    box-shadow: 0 0 16px var(--green-glow);
+    transform: translateY(-2px);
+    transition-delay: 0s;
+  }
+  @media (max-width: 640px) {
+    .skills {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

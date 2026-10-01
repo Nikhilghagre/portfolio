@@ -1,0 +1,231 @@
+---
+import { profile, testimonials } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+---
+
+<section id="contact" class="section">
+  <SectionHeading index={testimonials.length ? '06' : '05'} title="Get in touch" command="./contact.sh" />
+
+  <p class="intro" data-reveal>
+    Hiring, collaborating, or just want to talk systems and DSA? My inbox is always open — I usually reply within a day.
+  </p>
+
+  <div class="contact">
+    <div class="term" data-reveal style="--d:1">
+      <div class="term__bar">
+        <span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span>
+        <span class="term__title">contact.sh — bash</span>
+      </div>
+      <form class="term__body form" id="contact-form" data-email={profile.email} novalidate>
+        <label class="field">
+          <span class="field__prompt mono"><span class="accent">➜</span> <span class="cyan">name</span>:</span>
+          <input name="name" type="text" required autocomplete="name" placeholder="Jane Recruiter" />
+        </label>
+        <label class="field">
+          <span class="field__prompt mono"><span class="accent">➜</span> <span class="cyan">email</span>:</span>
+          <input name="email" type="email" required autocomplete="email" placeholder="jane@company.com" />
+        </label>
+        <label class="field field--area">
+          <span class="field__prompt mono"><span class="accent">➜</span> <span class="cyan">message</span>:</span>
+          <textarea name="message" rows="4" required placeholder="Hi! We have a backend role you might like…"></textarea>
+        </label>
+        <div class="form__actions">
+          <button class="btn" type="submit"><Icon name="send" size={16} /> send --message</button>
+        </div>
+        <pre class="form__log mono" id="contact-log" aria-live="polite"></pre>
+      </form>
+    </div>
+
+    <ul class="direct" data-reveal style="--d:2">
+      <li>
+        <span class="direct__label mono">email</span>
+        <button class="direct__value" type="button" data-copy={profile.email}>
+          <span>{profile.email}</span>
+          <span class="direct__copy"><Icon name="copy" size={15} /></span>
+        </button>
+      </li>
+      <li>
+        <span class="direct__label mono">phone</span>
+        <a class="direct__value" href={`tel:${profile.phone.replace(/\s/g, '')}`}>{profile.phone}</a>
+      </li>
+      {
+        profile.socials
+          .filter((s) => s.icon !== 'mail')
+          .map((s) => (
+            <li>
+              <span class="direct__label mono">{s.label.toLowerCase()}</span>
+              <a class="direct__value" href={s.url} target="_blank" rel="noopener">
+                <Icon name={s.icon} size={16} /> {s.label}
+              </a>
+            </li>
+          ))
+      }
+    </ul>
+  </div>
+</section>
+
+<footer class="footer mono">
+  <p>
+    <span class="accent">$</span> echo "built with Astro, coffee & clean code"
+  </p>
+  <p class="muted">© {new Date().getFullYear()} {profile.name} · process exited with code 0</p>
+</footer>
+
+<div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+
+<style>
+  .intro {
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 560px;
+    margin-bottom: 28px;
+  }
+  .contact {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .cyan {
+    color: var(--cyan);
+  }
+  .form {
+    display: grid;
+    gap: 16px;
+  }
+  .field {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--border);
+    transition: border-color 0.3s;
+  }
+  .field:focus-within {
+    border-bottom-color: var(--green);
+  }
+  .field--area {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field__prompt {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .field input,
+  .field textarea {
+    flex: 1;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-hi);
+    caret-color: var(--green);
+    resize: vertical;
+  }
+  .field ::placeholder {
+    color: var(--dim);
+  }
+  .field.is-invalid {
+    border-bottom-color: var(--red);
+  }
+  .form__actions {
+    margin-top: 4px;
+  }
+  .form__log {
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-wrap;
+    min-height: 0;
+  }
+  .form__log :global(.ok) {
+    color: var(--green);
+  }
+  .form__log :global(.err) {
+    color: var(--red);
+  }
+
+  .direct {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .direct li {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(14, 19, 24, 0.6);
+  }
+  .direct__label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .direct__value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--text-hi);
+    font-size: 15px;
+    word-break: break-all;
+    text-align: left;
+    transition: color 0.25s;
+  }
+  .direct__value:hover {
+    color: var(--green);
+  }
+  .direct__copy {
+    color: var(--muted);
+  }
+
+  .footer {
+    margin-top: 120px;
+    padding: 28px 0 40px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    display: grid;
+    gap: 4px;
+    color: var(--text);
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 80;
+    transform: translate(-50%, 20px);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--bg);
+    background: var(--green);
+    box-shadow: 0 10px 30px -10px var(--green);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.3s var(--ease),
+      transform 0.3s var(--ease);
+  }
+  .toast.is-show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  @media (max-width: 860px) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

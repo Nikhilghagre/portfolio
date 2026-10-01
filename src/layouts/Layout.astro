@@ -1,0 +1,155 @@
+---
+import '../styles/global.css';
+import { profile } from '../data/profile';
+
+interface Props {
+  title?: string;
+}
+const { title = `${profile.name} — ${profile.role}` } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={profile.tagline} />
+    <meta name="theme-color" content="#06080a" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={profile.tagline} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+    <script is:inline>
+      // decide before first paint whether to play the boot sequence
+      try {
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduce && !sessionStorage.getItem('booted')) document.documentElement.classList.add('booting');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <!-- boot screen: shown once per session -->
+    <div class="boot" id="boot" aria-hidden="true">
+      <pre class="boot__log" id="boot-log"></pre>
+      <span class="boot__skip mono">press any key to skip</span>
+    </div>
+
+    <div class="progress" id="progress"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+    <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <slot />
+
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>
+
+<style>
+  .progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 60;
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 100%);
+  }
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(600px 400px at 10% 0%, rgba(74, 222, 128, 0.07), transparent 70%),
+      radial-gradient(500px 400px at 100% 100%, rgba(94, 234, 212, 0.05), transparent 70%);
+  }
+  .spotlight {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(560px circle at var(--mx, 50%) var(--my, -20%), rgba(74, 222, 128, 0.06), transparent 70%);
+    transition: opacity 0.4s;
+  }
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+  }
+
+  /* boot */
+  .boot {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: clamp(20px, 5vw, 56px);
+    display: none;
+    flex-direction: column;
+    justify-content: flex-end;
+    transition:
+      opacity 0.6s var(--ease),
+      transform 0.6s var(--ease),
+      filter 0.6s;
+  }
+  :global(html.booting) .boot {
+    display: flex;
+  }
+  :global(html.booting) body {
+    overflow: hidden;
+  }
+  .boot.is-done {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(6px);
+    pointer-events: none;
+  }
+  .boot__log {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1.6vw, 14px);
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-wrap;
+    margin: 0;
+  }
+  .boot__log :global(.ok) {
+    color: var(--green);
+  }
+  .boot__log :global(.hi) {
+    color: var(--text-hi);
+  }
+  .boot__skip {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>

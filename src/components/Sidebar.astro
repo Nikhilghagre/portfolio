@@ -1,0 +1,372 @@
+---
+import { profile, testimonials } from '../data/profile';
+import Icon from './Icon.astro';
+
+const nav = [
+  { id: 'about', label: 'about' },
+  { id: 'experience', label: 'experience' },
+  { id: 'projects', label: 'projects' },
+  { id: 'skills', label: 'skills' },
+  { id: 'testimonials', label: 'testimonials' },
+  { id: 'contact', label: 'contact' },
+].filter((n) => n.id !== 'testimonials' || testimonials.length > 0);
+const roles = [profile.role, 'API Designer', 'System Thinker', 'Problem Solver', 'Mentor'];
+---
+
+<!-- mobile top bar -->
+<header class="topbar">
+  <a href="#top" class="topbar__brand mono"><span class="accent">~/</span>{profile.handle}</a>
+  <button class="topbar__menu" id="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+    <span class="i-open"><Icon name="menu" /></span>
+    <span class="i-close"><Icon name="close" /></span>
+  </button>
+</header>
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile">
+  {
+    nav.map((n, i) => (
+      <a href={`#${n.id}`} class="mono" style={`--d:${i}`}>
+        <span class="accent">0{i + 1}.</span> {n.label}
+      </a>
+    ))
+  }
+</nav>
+
+<aside class="side" id="top">
+  <div class="side__inner">
+    <p class="prompt mono" data-reveal>
+      <span class="accent">guest@portfolio</span><span class="muted">:</span><span class="cyan">~</span><span class="muted">$</span> whoami
+    </p>
+
+    <h1 class="name mono" data-type={profile.name} aria-label={profile.name}>
+      <span class="name__text"></span><span class="cursor"></span>
+    </h1>
+
+    <p class="role mono" data-reveal style="--d:2">
+      <span class="muted">&gt;</span>
+      <span class="role__text" data-roles={JSON.stringify(roles)}>{profile.role}</span>
+    </p>
+
+    <p class="tagline" data-reveal style="--d:3">{profile.tagline}</p>
+
+    <div class="meta mono" data-reveal style="--d:4">
+      {
+        profile.available && (
+          <span class="status">
+            <span class="status__dot" /> open to opportunities
+          </span>
+        )
+      }
+      <span class="loc">
+        <Icon name="pin" size={14} /> {profile.location}
+      </span>
+    </div>
+
+    <nav class="nav" aria-label="Sections" data-reveal style="--d:5">
+      <ul>
+        {
+          nav.map((n, i) => (
+            <li>
+              <a href={`#${n.id}`} data-nav={n.id} class="mono">
+                <span class="nav__num">0{i + 1}</span>
+                <span class="nav__line" />
+                <span class="nav__label">{n.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="side__foot" data-reveal style="--d:6">
+      <a class="btn" href={profile.resume} download>
+        <Icon name="download" size={16} /> resume.pdf
+      </a>
+      <ul class="socials">
+        {
+          profile.socials.map((s) => (
+            <li>
+              <a href={s.url} target={s.url.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={s.label} title={s.label}>
+                <Icon name={s.icon} size={20} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</aside>
+
+<style>
+  .side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    padding: 64px 0 40px;
+    display: flex;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .side::-webkit-scrollbar {
+    display: none;
+  }
+  .side__inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .prompt {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .cyan {
+    color: var(--cyan);
+  }
+  .name {
+    font-size: clamp(34px, 3.6vw, 46px);
+    line-height: 1.1;
+    font-weight: 700;
+    color: var(--text-hi);
+    letter-spacing: -0.02em;
+    min-height: 1.1em;
+  }
+  .name .cursor {
+    height: 0.9em;
+    vertical-align: -0.05em;
+  }
+  .role {
+    margin-top: 14px;
+    font-size: 18px;
+    color: var(--green);
+    display: flex;
+    gap: 10px;
+  }
+  .role__text::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    background: var(--green);
+    margin-left: 3px;
+    vertical-align: -0.15em;
+    animation: blink 1s steps(1) infinite;
+  }
+  .tagline {
+    margin-top: 18px;
+    max-width: 340px;
+    color: var(--muted);
+  }
+  .meta {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green);
+  }
+  .status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 var(--green);
+    animation: ping 2s infinite;
+  }
+  @keyframes ping {
+    0% {
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+    }
+    80%,
+    100% {
+      box-shadow: 0 0 0 8px rgba(74, 222, 128, 0);
+    }
+  }
+  .loc {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* nav */
+  .nav {
+    margin-top: clamp(24px, 5vh, 48px);
+  }
+  .nav ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--dim);
+    text-transform: lowercase;
+    transition: color 0.3s var(--ease);
+  }
+  .nav__num {
+    font-size: 11px;
+  }
+  .nav__line {
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+    transition:
+      width 0.35s var(--ease),
+      background 0.3s;
+  }
+  .nav a:hover,
+  .nav a.is-active {
+    color: var(--text-hi);
+  }
+  .nav a:hover .nav__line,
+  .nav a.is-active .nav__line {
+    width: 64px;
+    background: var(--green);
+  }
+  .nav a.is-active .nav__num {
+    color: var(--green);
+  }
+  .nav a.is-active .nav__label::before {
+    content: '> ';
+    color: var(--green);
+  }
+
+  .side__foot {
+    margin-top: auto;
+    padding-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .socials {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 6px;
+  }
+  .socials a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: var(--muted);
+    transition:
+      color 0.25s,
+      background 0.25s,
+      transform 0.25s var(--ease);
+  }
+  .socials a:hover {
+    color: var(--green);
+    background: var(--surface-2);
+    transform: translateY(-3px);
+  }
+
+  /* mobile bar */
+  .topbar,
+  .mobile-nav {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    .side {
+      position: relative;
+      height: auto;
+      padding: 112px 0 24px;
+    }
+    .nav {
+      display: none;
+    }
+    .side__foot {
+      margin-top: 32px;
+    }
+    .topbar {
+      display: flex;
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 50;
+      height: 60px;
+      padding: 0 16px;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(6, 8, 10, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar__brand {
+      font-weight: 700;
+      color: var(--text-hi);
+    }
+    .topbar__menu {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .i-close {
+      display: none;
+    }
+    :global(html.menu-open) .i-open {
+      display: none;
+    }
+    :global(html.menu-open) .i-close {
+      display: block;
+    }
+    .mobile-nav {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      position: fixed;
+      inset: 60px 0 0 0;
+      z-index: 49;
+      padding: 24px;
+      background: rgba(6, 8, 10, 0.96);
+      backdrop-filter: blur(14px);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.35s var(--ease),
+        visibility 0.35s;
+    }
+    .mobile-nav a {
+      font-size: 24px;
+      padding: 10px 0;
+      color: var(--text-hi);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition:
+        opacity 0.4s var(--ease),
+        transform 0.4s var(--ease);
+      transition-delay: calc(var(--d) * 50ms);
+    }
+    :global(html.menu-open) .mobile-nav {
+      opacity: 1;
+      visibility: visible;
+    }
+    :global(html.menu-open) .mobile-nav a {
+      opacity: 1;
+      transform: none;
+    }
+    :global(html.menu-open) body {
+      overflow: hidden;
+    }
+  }
+</style>
