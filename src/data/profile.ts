@@ -3,6 +3,9 @@
 //  Edit this file to update your portfolio — every section reads from here.
 // ─────────────────────────────────────────────────────────────
 
+// Resume: replace the PDF in this folder (keep the same file name) and the site uses the new one.
+import resumeUrl from './Nikhil Ghagre Backend Developer resume.pdf?url';
+
 export const profile = {
   name: 'Nikhil Ghagre',
   handle: 'nikhil',
@@ -13,16 +16,22 @@ export const profile = {
   available: true,
   email: 'nikhilghagre123@gmail.com',
   phone: '+91 95271 78690',
-  resume: `${import.meta.env.BASE_URL}resume.pdf`,
+  resume: resumeUrl,
   about: [
     "I'm a backend developer with 4.5+ years of experience building scalable services using Node.js, PHP and TypeScript. I work across REST API development, cloud infrastructure on AWS and database design — with a track record of improving system performance, engineering velocity and business conversion rates.",
     "Today I'm a Software Engineer III at Shaadi.com, where I own backend and product features end to end — from WhatsApp calling inside our advisor panel to migrating a Laravel codebase to TypeScript. Before that I built prize-distribution and financial reporting logic for real-money games.",
-    'I started as an Electrical Engineer building IoT devices, so I like understanding systems all the way down. I use AI-assisted tools like Claude Code and Cursor to ship faster, and I write teaching material on DSA, SOLID and design patterns to help others grow.',
+    'I started as an Electrical Engineer building IoT devices, so I like understanding systems all the way down. I use AI-assisted tools like Claude Code and Cursor to ship faster.',
   ],
   stats: [
     { value: 4.5, suffix: '+', label: 'years experience' },
     { value: 3, suffix: '', label: 'companies' },
     { value: 20, suffix: '+', label: 'technologies used' },
+  ],
+  // Companies highlighted under the tagline. Add more lines to show previous companies;
+  // `current: true` gets the "currently at" label, the rest show under "previously at".
+  companies: [
+    { name: '@shaadi.com', url: 'https://www.shaadi.com', current: true },
+    // { name: '@company', url: 'https://company.com' },
   ],
   socials: [
     { label: 'GitHub', url: 'https://github.com/nikhilghagre', icon: 'github' },
@@ -155,9 +164,19 @@ export const skills = [
   { group: 'AI-Assisted Dev', items: ['Claude Code', 'Cursor'] },
 ];
 
-// Add real recommendations here (e.g. from LinkedIn). The section stays hidden while this is empty.
-// { quote: '...', name: 'Full Name', title: 'Role, Company' }
-export const testimonials: { quote: string; name: string; title: string }[] = [];
+export type Testimonial = {
+  name: string;
+  title?: string; // role and company, e.g. 'Tech Lead, Shaadi.com'
+  rating: 1 | 2 | 3 | 4 | 5;
+  quote: string;
+};
+
+// Reviews shown in the "What people say" section. Add them here yourself, e.g.
+// { name: 'Full Name', title: 'Role, Company', rating: 5, quote: 'What they said...' },
+// The section and its menu link stay hidden while this list is empty.
+export const testimonials: Testimonial[] = [
+ 
+];
 
 export const education = [
   { title: 'B.E. — Electrical Engineering', place: 'KDK College of Engineering, Nagpur', period: '2017 — 2021' },

@@ -8,44 +8,112 @@ const initials = (n: string) =>
     .split(' ')
     .map((w) => w[0])
     .join('')
-    .slice(0, 2);
-// duplicate the list so the marquee loops seamlessly
+    .slice(0, 2)
+    .toUpperCase();
+const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+const count = testimonials.length;
+const average = count ? testimonials.reduce((s, t) => s + t.rating, 0) / count : 0;
+// 3+ reviews scroll as a marquee; fewer sit in a simple grid
+const useMarquee = count >= 3;
 const rows = [testimonials, [...testimonials].reverse()];
 ---
 
-{testimonials.length > 0 && (
+{count > 0 && (
 <section id="testimonials" class="section">
   <SectionHeading index="05" title="What people say" command="tail -f reviews.log" />
 
-  <div class="marquee" data-reveal>
-    {
-      rows.map((row, r) => (
-        <div class:list={['marquee__row', { 'marquee__row--rev': r === 1 }]}>
-          <div class="marquee__track">
-            {[...row, ...row].map((t, i) => (
-              <figure class="quote" aria-hidden={i >= row.length ? 'true' : undefined}>
-                <span class="quote__icon">
-                  <Icon name="quote" size={18} />
+  <div class="summary" data-reveal>
+    <p class="summary__score">
+      <span class="summary__avg mono">{average.toFixed(1)}</span>
+      <span class="summary__stars" aria-label={`${average.toFixed(1)} out of 5 stars`}>{stars(Math.round(average))}</span>
+      <span class="summary__count mono">
+        {count} {count === 1 ? 'review' : 'reviews'}
+      </span>
+    </p>
+  </div>
+
+  {
+    count > 0 &&
+      (useMarquee ? (
+        <div class="marquee" data-reveal>
+          {rows.map((row, r) => (
+            <div class:list={['marquee__row', { 'marquee__row--rev': r === 1 }]}>
+              <div class="marquee__track">
+                {[...row, ...row].map((t, i) => (
+                  <figure class="quote" aria-hidden={i >= row.length ? 'true' : undefined}>
+                    <span class="quote__stars" aria-label={`${t.rating} out of 5 stars`}>{stars(t.rating)}</span>
+                    <blockquote>{t.quote}</blockquote>
+                    <figcaption>
+                      <span class="quote__avatar mono">{initials(t.name)}</span>
+                      <span>
+                        <span class="quote__name">{t.name}</span>
+                        {t.title && <span class="quote__title">{t.title}</span>}
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="grid">
+          {testimonials.map((t, i) => (
+            <figure class="quote" data-reveal style={`--d:${i}`}>
+              <span class="quote__stars" aria-label={`${t.rating} out of 5 stars`}>{stars(t.rating)}</span>
+              <blockquote>{t.quote}</blockquote>
+              <figcaption>
+                <span class="quote__avatar mono">{initials(t.name)}</span>
+                <span>
+                  <span class="quote__name">{t.name}</span>
+                  {t.title && <span class="quote__title">{t.title}</span>}
                 </span>
-                <blockquote>{t.quote}</blockquote>
-                <figcaption>
-                  <span class="quote__avatar mono">{initials(t.name)}</span>
-                  <span>
-                    <span class="quote__name">{t.name}</span>
-                    <span class="quote__title">{t.title}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+              </figcaption>
+            </figure>
+          ))}
         </div>
       ))
-    }
-  </div>
+  }
+
 </section>
 )}
 
 <style>
+  .summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .summary__score {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .summary__avg {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-hi);
+  }
+  .summary__stars {
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+  }
+  .summary__count {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
   .marquee {
     display: grid;
     gap: 16px;
@@ -73,9 +141,11 @@ const rows = [testimonials, [...testimonials].reverse()];
       transform: translateX(calc(-50% - 8px));
     }
   }
-  .quote {
+  .marquee .quote {
     width: 340px;
     flex-shrink: 0;
+  }
+  .quote {
     padding: 20px;
     border-radius: var(--radius);
     background: var(--surface);
@@ -91,9 +161,10 @@ const rows = [testimonials, [...testimonials].reverse()];
     border-color: rgba(74, 222, 128, 0.35);
     transform: translateY(-3px);
   }
-  .quote__icon {
-    color: var(--green);
-    opacity: 0.7;
+  .quote__stars {
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--amber);
   }
   blockquote {
     font-size: 15px;
@@ -130,8 +201,9 @@ const rows = [testimonials, [...testimonials].reverse()];
     font-size: 12px;
     color: var(--muted);
   }
+
   @media (max-width: 640px) {
-    .quote {
+    .marquee .quote {
       width: 280px;
     }
   }

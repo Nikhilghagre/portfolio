@@ -2,6 +2,9 @@
 import { profile, testimonials } from '../data/profile';
 import SectionHeading from './SectionHeading.astro';
 import Icon from './Icon.astro';
+
+// Switch: false = hide the message form and show only the contact details.
+const showForm = false;
 ---
 
 <section id="contact" class="section">
@@ -11,7 +14,8 @@ import Icon from './Icon.astro';
     Hiring, collaborating, or just want to talk systems and DSA? My inbox is always open — I usually reply within a day.
   </p>
 
-  <div class="contact">
+  <div class:list={['contact', { 'contact--no-form': !showForm }]}>
+    {showForm && (
     <div class="term" data-reveal style="--d:1">
       <div class="term__bar">
         <span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span>
@@ -36,6 +40,7 @@ import Icon from './Icon.astro';
         <pre class="form__log mono" id="contact-log" aria-live="polite"></pre>
       </form>
     </div>
+    )}
 
     <ul class="direct" data-reveal style="--d:2">
       <li>
@@ -86,6 +91,18 @@ import Icon from './Icon.astro';
     grid-template-columns: 1.5fr 1fr;
     gap: 20px;
     align-items: start;
+  }
+  /* without the form, the contact cards fill the width in two columns */
+  .contact--no-form {
+    grid-template-columns: 1fr;
+  }
+  .contact--no-form .direct {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 560px) {
+    .contact--no-form .direct {
+      grid-template-columns: 1fr;
+    }
   }
   .cyan {
     color: var(--cyan);

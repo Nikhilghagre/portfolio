@@ -7,7 +7,7 @@ const nav = [
   { id: 'experience', label: 'experience' },
   { id: 'projects', label: 'projects' },
   { id: 'skills', label: 'skills' },
-  { id: 'testimonials', label: 'testimonials' },
+  { id: 'testimonials', label: 'reviews' },
   { id: 'contact', label: 'contact' },
 ].filter((n) => n.id !== 'testimonials' || testimonials.length > 0);
 const roles = [profile.role, 'API Designer', 'System Thinker', 'Problem Solver', 'Mentor'];
@@ -48,6 +48,29 @@ const roles = [profile.role, 'API Designer', 'System Thinker', 'Problem Solver',
 
     <p class="tagline" data-reveal style="--d:3">{profile.tagline}</p>
 
+    {
+      profile.companies.length > 0 && (
+        <div class="companies mono" data-reveal style="--d:3">
+          {[true, false].map((isCurrent) => {
+            const list = profile.companies.filter((c) => Boolean(c.current) === isCurrent);
+            return (
+              list.length > 0 && (
+                <p class="companies__row">
+                  <span class="companies__label">{isCurrent ? 'currently at' : 'previously at'}</span>
+                  {list.map((c) => (
+                    <a href={c.url} target="_blank" rel="noopener" class:list={['company', { 'company--current': isCurrent }]}>
+                      {c.name}
+                      <Icon name="external" size={12} />
+                    </a>
+                  ))}
+                </p>
+              )
+            );
+          })}
+        </div>
+      )
+    }
+
     <div class="meta mono" data-reveal style="--d:4">
       {
         profile.available && (
@@ -78,7 +101,7 @@ const roles = [profile.role, 'API Designer', 'System Thinker', 'Problem Solver',
     </nav>
 
     <div class="side__foot" data-reveal style="--d:6">
-      <a class="btn" href={profile.resume} download>
+      <a class="btn" href={profile.resume} download={`${profile.name.replace(/\s+/g, "-")}-Resume.pdf`}>
         <Icon name="download" size={16} /> resume.pdf
       </a>
       <ul class="socials">
@@ -156,6 +179,61 @@ const roles = [profile.role, 'API Designer', 'System Thinker', 'Problem Solver',
     margin-top: 18px;
     max-width: 340px;
     color: var(--muted);
+  }
+  .companies {
+    margin-top: 18px;
+    display: grid;
+    gap: 8px;
+  }
+  .companies__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .companies__label {
+    color: var(--dim);
+  }
+  .companies__label::before {
+    content: '// ';
+  }
+  .company {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-hi);
+    background: var(--surface-2);
+    border: 1px solid var(--border-hi);
+    transition:
+      color 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s,
+      transform 0.25s var(--ease);
+  }
+  .company :global(svg) {
+    color: var(--muted);
+    transition: transform 0.25s var(--ease), color 0.25s;
+  }
+  .company--current {
+    color: var(--green);
+    border-color: rgba(74, 222, 128, 0.4);
+    background: rgba(74, 222, 128, 0.08);
+    box-shadow: 0 0 20px -6px rgba(74, 222, 128, 0.45);
+  }
+  .company:hover {
+    color: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 24px -4px rgba(74, 222, 128, 0.55);
+    transform: translateY(-2px);
+  }
+  .company:hover :global(svg) {
+    color: var(--green);
+    transform: translate(2px, -2px);
   }
   .meta {
     margin-top: 22px;
