@@ -13,7 +13,7 @@ export const profile = {
   available: true,
   email: 'nikhilghagre123@gmail.com',
   phone: '+91 95271 78690',
-  resume: '/resume.pdf',
+  resume: `${import.meta.env.BASE_URL}resume.pdf`,
   about: [
     "I'm a backend developer with 4.5+ years of experience building scalable services using Node.js, PHP and TypeScript. I work across REST API development, cloud infrastructure on AWS and database design — with a track record of improving system performance, engineering velocity and business conversion rates.",
     "Today I'm a Software Engineer III at Shaadi.com, where I own backend and product features end to end — from WhatsApp calling inside our advisor panel to migrating a Laravel codebase to TypeScript. Before that I built prize-distribution and financial reporting logic for real-money games.",
@@ -22,7 +22,6 @@ export const profile = {
   stats: [
     { value: 4.5, suffix: '+', label: 'years experience' },
     { value: 3, suffix: '', label: 'companies' },
-    { value: 200, suffix: 'K+', label: 'monthly visitors served' },
     { value: 20, suffix: '+', label: 'technologies used' },
   ],
   socials: [

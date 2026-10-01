@@ -16,7 +16,7 @@ import SectionHeading from './SectionHeading.astro';
     }
   </div>
 
-  <div class="stats">
+  <div class="stats" style={`--n:${profile.stats.length}`}>
     {
       profile.stats.map((s, i) => (
         <div class="stat" data-reveal style={`--d:${i + 1}`}>
@@ -41,7 +41,7 @@ import SectionHeading from './SectionHeading.astro';
   .stats {
     margin-top: 40px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--n, 4), 1fr);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: rgba(14, 19, 24, 0.6);
@@ -71,15 +71,19 @@ import SectionHeading from './SectionHeading.astro';
     font-size: 13px;
     color: var(--muted);
   }
+  /* 4+ stats fold into a 2×2 grid on phones; 3 or fewer stay in one row */
   @media (max-width: 640px) {
-    .stats {
+    .stats[style*='--n:4'] {
       grid-template-columns: 1fr 1fr;
     }
-    .stat:nth-child(2) {
+    .stats[style*='--n:4'] .stat:nth-child(2) {
       border-right: 0;
     }
-    .stat:nth-child(-n + 2) {
+    .stats[style*='--n:4'] .stat:nth-child(-n + 2) {
       border-bottom: 1px solid var(--border);
+    }
+    .stat__value {
+      font-size: 24px;
     }
   }
 </style>
