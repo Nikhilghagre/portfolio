@@ -1,0 +1,152 @@
+---
+import Layout from './Layout.astro';
+import { profile } from '../data/profile';
+import { url } from '../lib/url';
+import '../styles/prose.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** breadcrumb segments after ~/learn, e.g. [{ label: 'solid', href: 'learn/solid/' }] */
+  crumbs?: { label: string; href?: string }[];
+}
+const { title, description, crumbs = [] } = Astro.props;
+---
+
+<Layout title={`${title} · ${profile.name}`} description={description}>
+  <header class="lh">
+    <div class="lh__inner">
+      <nav class="lh__path mono" aria-label="Breadcrumb">
+        <a href={url()} class="lh__home"><span class="accent">~</span></a>
+        <span class="lh__sep">/</span>
+        <a href={url('learn/')} class:list={[{ 'is-current': crumbs.length === 0 }]}>learn</a>
+        {
+          crumbs.map((c, i) => (
+            <>
+              <span class="lh__sep">/</span>
+              {c.href && i < crumbs.length - 1 ? (
+                <a href={url(c.href)}>{c.label}</a>
+              ) : (
+                <span class="is-current">{c.label}</span>
+              )}
+            </>
+          ))
+        }
+        <span class="cursor" aria-hidden="true"></span>
+      </nav>
+      <div class="lh__links mono">
+        <a href={url()}>portfolio</a>
+        <a href={url('learn/')} class="is-active">learn</a>
+        <a href={profile.socials[0].url} target="_blank" rel="noopener">github</a>
+      </div>
+    </div>
+  </header>
+
+  <slot />
+
+  <footer class="lf mono">
+    <p><span class="accent">$</span> echo "learn in public, one refactor at a time"</p>
+    <p class="muted">
+      © {new Date().getFullYear()} {profile.name} · <a href={url()}>portfolio</a> · <a href={url('learn/')}>learning hub</a>
+    </p>
+  </footer>
+
+  <script>
+    import '../scripts/learn';
+  </script>
+</Layout>
+
+<style>
+  .lh {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(6, 8, 10, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .lh__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .lh__path {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .lh__path a {
+    transition: color 0.2s;
+  }
+  .lh__path a:hover {
+    color: var(--green);
+  }
+  .lh__home {
+    font-weight: 700;
+  }
+  .lh__sep {
+    color: var(--dim);
+  }
+  .is-current {
+    color: var(--text-hi);
+  }
+  .lh__path .cursor {
+    width: 0.5em;
+    height: 1em;
+  }
+  .lh__links {
+    display: flex;
+    gap: 4px;
+    font-size: 13px;
+  }
+  .lh__links a {
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    transition:
+      color 0.2s,
+      background 0.2s;
+  }
+  .lh__links a:hover {
+    color: var(--text-hi);
+    background: var(--surface-2);
+  }
+  .lh__links a.is-active {
+    color: var(--green);
+    background: rgba(74, 222, 128, 0.08);
+  }
+  .lf {
+    max-width: 1280px;
+    margin: 96px auto 0;
+    padding: 28px 32px 40px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    display: grid;
+    gap: 4px;
+  }
+  .lf a:hover {
+    color: var(--green);
+  }
+  @media (max-width: 640px) {
+    .lh__inner {
+      padding: 0 16px;
+    }
+    .lh__links a:not(:first-child) {
+      display: none;
+    }
+    .lf {
+      padding: 24px 16px 32px;
+    }
+  }
+</style>

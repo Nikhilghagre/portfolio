@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ORD-1789056688779",
+    "email": "nikhil@example.com",
+    "items": [
+      {
+        "name": "Keyboard",
+        "price": 2000,
+        "qty": 1
+      },
+      {
+        "name": "Mouse",
+        "price": 800,
+        "qty": 2
+      }
+    ],
+    "total": 3398.4,
+    "paymentId": "ch_v5m1e79x",
+    "status": "PAID",
+    "createdAt": "2026-09-10T16:11:28.779Z"
+  }
+]

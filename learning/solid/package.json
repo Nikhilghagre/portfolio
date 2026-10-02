@@ -1,0 +1,29 @@
+{
+  "name": "solid-learning",
+  "version": "1.0.0",
+  "description": "Learning SOLID principles and design patterns by refactoring a real Node.js app",
+  "type": "commonjs",
+  "scripts": {
+    "bad": "node 00-bad-design/run.js",
+    "srp": "node 01-srp/run.js",
+    "test:srp": "node --test 01-srp/test.js",
+    "ocp": "node 02-ocp/run.js",
+    "ocp:extend": "node 02-ocp/extend-demo.js",
+    "test:ocp": "node --test 02-ocp/test.js",
+    "lsp:bad": "node 03-lsp/bad/demo-broken.js",
+    "lsp:good": "node 03-lsp/good/demo-fixed.js",
+    "lsp:square": "node 03-lsp/rectangle-square.js",
+    "test:lsp": "node --test 03-lsp/contract-test.js",
+    "lsp:1": "node 03-lsp/simple/1-problem.js",
+    "lsp:2": "node 03-lsp/simple/2-fix.js",
+    "lsp:3": "node 03-lsp/simple/3-the-silent-one.js",
+    "isp:1": "node 04-isp/simple/1-problem.js",
+    "isp:2": "node 04-isp/simple/2-fix.js",
+    "isp:3": "node 04-isp/simple/3-client-side.js",
+    "isp:app": "node 04-isp/app/demo.js",
+    "dip:1": "node 05-dip/simple/1-problem.js",
+    "dip:2": "node 05-dip/simple/2-fix.js",
+    "dip:3": "node 05-dip/simple/3-the-inversion.js",
+    "dip:4": "node 05-dip/simple/4-composition-root.js"
+  }
+}

@@ -1,0 +1,198 @@
+---
+import { solidSteps, solidUpcoming } from '../../data/learn';
+import { url } from '../../lib/url';
+
+interface Props {
+  /** current page id, e.g. "03-lsp" or "03-lsp/simple/readme" */
+  current: string;
+  /** deep-dive pages of the current step */
+  extras?: { id: string; title: string }[];
+}
+const { current, extras = [] } = Astro.props;
+const step = current.split('/')[0];
+---
+
+<nav class="cn" aria-label="Course">
+  <a href={url('learn/solid/')} class="cn__title mono">
+    <span class="accent">❯</span> SOLID in Node.js
+  </a>
+  <div class="cn__progress mono" data-progress="solid" data-total={solidSteps.length}>
+    <span class="cn__bar"><span class="cn__fill"></span></span>
+    <span class="cn__count"><span data-progress-count>0</span>/{solidSteps.length}</span>
+  </div>
+
+  <ol class="cn__list">
+    {
+      solidSteps.map((s) => (
+        <li>
+          <a
+            href={url(`learn/solid/${s.id}/`)}
+            class:list={['cn__step', { 'is-current': s.id === step }]}
+            data-step={s.id}
+            aria-current={s.id === current ? 'page' : undefined}
+          >
+            <span class="cn__letter mono">{s.letter}</span>
+            <span class="cn__name">{s.name}</span>
+            <span class="cn__check" aria-label="completed">✓</span>
+          </a>
+          {s.id === step && extras.length > 0 && (
+            <ul class="cn__extras">
+              {extras.map((e) => (
+                <li>
+                  <a href={url(`learn/solid/${e.id}/`)} class:list={[{ 'is-current': e.id === current }]}>
+                    {e.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))
+    }
+    {
+      solidUpcoming.map((s) => (
+        <li>
+          <span class="cn__step is-soon">
+            <span class="cn__letter mono">{s.letter}</span>
+            <span class="cn__name">{s.name}</span>
+            <span class="cn__soon mono">soon</span>
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .cn {
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-bottom: 24px;
+  }
+  .cn__title {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-hi);
+  }
+  .cn__progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 18px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .cn__bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .cn__fill {
+    display: block;
+    height: 100%;
+    width: var(--pct, 0%);
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    transition: width 0.6s var(--ease);
+  }
+  .cn__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .cn__step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--muted);
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  a.cn__step:hover {
+    background: var(--surface-2);
+    color: var(--text-hi);
+  }
+  .cn__step.is-current {
+    background: rgba(74, 222, 128, 0.08);
+    color: var(--text-hi);
+  }
+  .cn__letter {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 7px;
+    border: 1px solid var(--border-hi);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    transition:
+      background 0.3s,
+      color 0.3s,
+      border-color 0.3s;
+  }
+  .is-current .cn__letter {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .cn__name {
+    flex: 1;
+    min-width: 0;
+  }
+  .cn__check {
+    color: var(--green);
+    font-size: 13px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition:
+      opacity 0.3s,
+      transform 0.3s var(--ease);
+  }
+  :global(.is-done) > .cn__check {
+    opacity: 1;
+    transform: none;
+  }
+  :global(.is-done) > .cn__letter {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--bg);
+  }
+  .is-soon {
+    opacity: 0.5;
+  }
+  .cn__soon {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .cn__extras {
+    list-style: none;
+    margin: 2px 0 6px 22px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border);
+  }
+  .cn__extras a {
+    display: block;
+    padding: 5px 8px;
+    font-size: 13px;
+    color: var(--muted);
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  .cn__extras a:hover,
+  .cn__extras a.is-current {
+    color: var(--green);
+  }
+</style>

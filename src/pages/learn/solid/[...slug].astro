@@ -1,0 +1,551 @@
+---
+import { getCollection, render } from 'astro:content';
+import LearnLayout from '../../../layouts/LearnLayout.astro';
+import CourseNav from '../../../components/learn/CourseNav.astro';
+import CodeExplorer from '../../../components/learn/CodeExplorer.astro';
+import { solidSteps, sourceRepo } from '../../../data/learn';
+import { filesIn } from '../../../lib/code';
+import { url } from '../../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('solid')).filter((e) => e.id !== 'readme');
+  const titleOf = (body = '') => body.match(/^#\s+(.+)$/m)?.[1].trim() ?? '';
+  // "03-lsp/notes" -> "03-lsp", "03-lsp/simple/readme" -> "03-lsp/simple"
+  const slugOf = (id: string) => id.replace(/\/(notes|readme)$/, '');
+
+  return entries.map((entry) => {
+    const slug = slugOf(entry.id);
+    const stepId = slug.split('/')[0];
+    const extras = entries
+      .filter((e) => e.id.startsWith(stepId + '/') && slugOf(e.id) !== stepId)
+      .map((e) => ({ id: slugOf(e.id), title: titleOf(e.body) }))
+      .sort((a, b) => a.id.localeCompare(b.id));
+    return { params: { slug }, props: { entry, slug, stepId, extras, title: titleOf(entry.body) } };
+  });
+}
+
+const { entry, slug, stepId, extras, title } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const index = solidSteps.findIndex((s) => s.id === stepId);
+const step = solidSteps[index];
+const isMain = slug === stepId;
+const prev = isMain ? solidSteps[index - 1] : undefined;
+const next = isMain ? solidSteps[index + 1] : undefined;
+// the main page shows the whole step folder; a deep dive shows only its own folder
+const folder = isMain ? stepId : entry.id.split('/').slice(0, -1).join('/');
+const files = filesIn(folder);
+const toc = headings.filter((h) => h.depth === 2);
+const stepNo = String(index).padStart(2, '0');
+
+const pageTitle = isMain ? `${step.name} (${step.short})` : title;
+const cloneCmds = ['git clone https://github.com/Nikhilghagre/portfolio.git', 'cd portfolio/learning/solid'];
+const runLines: [string, string][] = [
+  ['#', '# get the code'],
+  ...cloneCmds.map((c): [string, string] => ['$', c]),
+  ['', ''],
+  ['#', '# run this step'],
+  ...step.run.map((c): [string, string] => ['$', c]),
+];
+---
+
+<LearnLayout
+  title={pageTitle}
+  description={isMain ? step.summary : `${title} — a deep dive in the SOLID in Node.js course.`}
+  crumbs={[{ label: 'solid', href: 'learn/solid/' }, ...(isMain ? [{ label: stepId }] : [{ label: stepId, href: `learn/solid/${stepId}/` }, { label: slug.split('/').slice(1).join('/') }])]}
+>
+  <div class="lesson">
+    <aside class="lesson__nav">
+      <CourseNav current={slug} extras={extras} />
+    </aside>
+
+    <article class="lesson__main">
+      <header class="hero" data-reveal>
+        <div class="hero__glyph mono" aria-hidden="true">{step.letter}</div>
+        <div>
+          <p class="hero__eyebrow mono">
+            {isMain ? <>step {stepNo} · {step.short}</> : <>deep dive · {step.short}</>}
+          </p>
+          <h1 class="hero__title">{isMain ? step.name : title}</h1>
+          {isMain && <p class="hero__summary">{step.summary}</p>}
+          <div class="hero__meta mono">
+            <span>{files.length} code files</span>
+            <span>·</span>
+            <span>~{Math.max(3, Math.round((entry.body?.split(/\s+/).length ?? 0) / 200))} min read</span>
+            {files.length > 0 && (
+              <>
+                <span>·</span>
+                <a href="#code" class="accent">jump to code ↓</a>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {
+        isMain && extras.length > 0 && (
+          <div class="extras" data-reveal>
+            <p class="extras__label mono">also in this step</p>
+            <div class="extras__grid">
+              {extras.map((e) => (
+                <a href={url(`learn/solid/${e.id}/`)} class="extras__card">
+                  <span class="extras__path mono">{e.id.split('/').slice(1).join('/')}/</span>
+                  <span class="extras__title">{e.title}</span>
+                  <span class="extras__arrow">→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )
+      }
+
+      {
+        !isMain && (
+          <a href={url(`learn/solid/${stepId}/`)} class="back mono">
+            ← back to {step.name}
+          </a>
+        )
+      }
+
+      <div class="prose" data-lesson>
+        <Content />
+      </div>
+
+      {
+        files.length > 0 && (
+          <section class="block" id="code">
+            <h2 class="block__title">
+              <span class="mono accent">$</span> explore the code
+            </h2>
+            <p class="block__hint">
+              Every file from <code class="mono">{folder}/</code>. File names in the lesson above are clickable — they open here.
+            </p>
+            <CodeExplorer files={files} root={folder} />
+          </section>
+        )
+      }
+
+      {
+        isMain && (
+          <section class="block">
+            <h2 class="block__title">
+              <span class="mono accent">$</span> run it yourself
+            </h2>
+            <div class="term run">
+              <div class="term__bar">
+                <span class="term__dot" />
+                <span class="term__dot" />
+                <span class="term__dot" />
+                <span class="term__title">bash — node ≥ 18, no dependencies</span>
+              </div>
+              <pre class="term__body mono">{runLines.map(([kind, text]) => <>{kind === '$' && <span class="accent">$ </span>}<span class:list={[{ muted: kind === '#' }]}>{text}</span>{'\n'}</>)}</pre>
+              <button type="button" class="run__copy mono" data-copy-text={[...cloneCmds, ...step.run].join('\n')}>
+                copy
+              </button>
+            </div>
+            <p class="block__hint">
+              Or browse it on <a href={`${sourceRepo}/${stepId}`} target="_blank" rel="noopener">GitHub ↗</a>
+            </p>
+          </section>
+        )
+      }
+
+      {
+        isMain && (
+          <section class="done" data-reveal>
+            <div>
+              <p class="done__title">Finished this step?</p>
+              <p class="done__text">Mark it complete to track your progress through the course. Saved in this browser only.</p>
+            </div>
+            <button type="button" class="btn" data-complete={stepId}>
+              <span class="done__label">mark as complete</span>
+            </button>
+          </section>
+        )
+      }
+
+      <nav class="pager" aria-label="Lessons">
+        {
+          isMain ? (
+            <>
+              {prev ? (
+                <a class="pager__link" href={url(`learn/solid/${prev.id}/`)}>
+                  <span class="pager__dir mono">← previous</span>
+                  <span class="pager__name">{prev.name}</span>
+                </a>
+              ) : (
+                <a class="pager__link" href={url('learn/solid/')}>
+                  <span class="pager__dir mono">← course</span>
+                  <span class="pager__name">Overview</span>
+                </a>
+              )}
+              {next ? (
+                <a class="pager__link pager__link--next" href={url(`learn/solid/${next.id}/`)}>
+                  <span class="pager__dir mono">next →</span>
+                  <span class="pager__name">{next.name}</span>
+                </a>
+              ) : (
+                <a class="pager__link pager__link--next" href={url('learn/')}>
+                  <span class="pager__dir mono">done →</span>
+                  <span class="pager__name">Back to Learning Hub</span>
+                </a>
+              )}
+            </>
+          ) : (
+            <a class="pager__link" href={url(`learn/solid/${stepId}/`)}>
+              <span class="pager__dir mono">← back to step</span>
+              <span class="pager__name">{step.name}</span>
+            </a>
+          )
+        }
+      </nav>
+    </article>
+
+    {
+      toc.length > 2 && (
+        <aside class="toc mono" aria-label="On this page">
+          <p class="toc__label">on this page</p>
+          <ul>
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} data-toc={h.slug}>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+  </div>
+</LearnLayout>
+
+<style>
+  .lesson {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 32px 0;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 200px;
+    gap: 48px;
+    align-items: start;
+  }
+  .lesson__main {
+    min-width: 0;
+    max-width: 780px;
+  }
+
+  .hero {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero__glyph {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 84px;
+    height: 84px;
+    border-radius: 18px;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--green);
+    background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.18), rgba(74, 222, 128, 0.03));
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    box-shadow:
+      0 0 40px -10px rgba(74, 222, 128, 0.4),
+      inset 0 0 20px rgba(74, 222, 128, 0.06);
+    text-shadow: 0 0 18px rgba(74, 222, 128, 0.6);
+  }
+  .hero__eyebrow {
+    font-size: 12px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .hero__title {
+    margin-top: 4px;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1.15;
+    font-weight: 700;
+    color: var(--text-hi);
+    letter-spacing: -0.02em;
+  }
+  .hero__summary {
+    margin-top: 10px;
+    font-size: 17px;
+    color: var(--muted);
+  }
+  .hero__meta {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  .extras {
+    margin-bottom: 32px;
+  }
+  .extras__label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+  .extras__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .extras__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 40px 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition:
+      border-color 0.25s,
+      transform 0.25s var(--ease);
+  }
+  .extras__card:hover {
+    border-color: rgba(74, 222, 128, 0.4);
+    transform: translateY(-2px);
+  }
+  .extras__path {
+    font-size: 11px;
+    color: var(--green);
+  }
+  .extras__title {
+    font-size: 14px;
+    color: var(--text-hi);
+    line-height: 1.4;
+  }
+  .extras__arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    transition:
+      transform 0.25s var(--ease),
+      color 0.25s;
+  }
+  .extras__card:hover .extras__arrow {
+    color: var(--green);
+    transform: translate(4px, -50%);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .back:hover {
+    color: var(--green);
+  }
+
+  .block {
+    margin-top: 64px;
+  }
+  .block__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-hi);
+    margin-bottom: 8px;
+  }
+  .block__hint {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .block__hint + :global(.term),
+  .run + .block__hint {
+    margin-top: 14px;
+  }
+  .block__hint code {
+    color: var(--cyan);
+    font-size: 0.92em;
+  }
+  .block__hint a {
+    color: var(--green);
+  }
+  .run {
+    position: relative;
+  }
+  .run .term__body {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-hi);
+  }
+  .run__copy {
+    position: absolute;
+    top: 52px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .run__copy:hover,
+  .run__copy.is-done {
+    color: var(--green);
+  }
+
+  .done {
+    margin-top: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--border-hi);
+    background: rgba(14, 19, 24, 0.6);
+    transition:
+      border-color 0.3s,
+      background 0.3s;
+  }
+  .done__title {
+    font-weight: 600;
+    color: var(--text-hi);
+  }
+  .done__text {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  :global(.done.is-done) {
+    border-style: solid;
+    border-color: rgba(74, 222, 128, 0.4);
+    background: rgba(74, 222, 128, 0.05);
+  }
+
+  .pager {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pager__link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition:
+      border-color 0.25s,
+      transform 0.25s var(--ease);
+  }
+  .pager__link:hover {
+    border-color: rgba(74, 222, 128, 0.4);
+    transform: translateY(-2px);
+  }
+  .pager__link--next {
+    grid-column: 2;
+    text-align: right;
+  }
+  .pager__dir {
+    font-size: 12px;
+    color: var(--green);
+  }
+  .pager__name {
+    color: var(--text-hi);
+    font-weight: 600;
+  }
+
+  .toc {
+    position: sticky;
+    top: 84px;
+    font-size: 12px;
+  }
+  .toc__label {
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    border-left: 1px solid var(--border);
+  }
+  .toc a {
+    display: block;
+    padding: 5px 0 5px 14px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--muted);
+    line-height: 1.45;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .toc a:hover {
+    color: var(--text-hi);
+  }
+  .toc a.is-active {
+    color: var(--green);
+    border-left-color: var(--green);
+  }
+
+  @media (max-width: 1240px) {
+    .lesson {
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+    .toc {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .lesson {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 24px 16px 0;
+      gap: 24px;
+    }
+    .lesson__nav {
+      order: 2;
+    }
+    .lesson__nav :global(.cn) {
+      position: static;
+      max-height: none;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .hero {
+      gap: 16px;
+    }
+    .hero__glyph {
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      border-radius: 14px;
+    }
+    .pager {
+      grid-template-columns: 1fr;
+    }
+    .pager__link--next {
+      grid-column: auto;
+    }
+  }
+</style>

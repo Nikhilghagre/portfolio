@@ -1,0 +1,221 @@
+---
+import { Code } from 'astro:components';
+import type { CodeFile } from '../../lib/code';
+
+interface Props {
+  files: CodeFile[];
+  /** folder the paths are shown relative to, e.g. "01-srp" */
+  root: string;
+}
+const { files, root } = Astro.props;
+
+const rel = (p: string) => p.slice(root.length + 1);
+// group by sub-folder ('' = root of the step)
+const groups = new Map<string, CodeFile[]>();
+for (const f of files) {
+  const dir = f.dir === root ? '' : f.dir.slice(root.length + 1);
+  groups.set(dir, [...(groups.get(dir) ?? []), f]);
+}
+const lines = (c: string) => c.replace(/\n$/, '').split('\n').length;
+---
+
+{
+  files.length > 0 && (
+    <div class="cx term" data-explorer>
+      <div class="term__bar">
+        <span class="term__dot" />
+        <span class="term__dot" />
+        <span class="term__dot" />
+        <span class="term__title">
+          explorer — {root} · {files.length} files
+        </span>
+      </div>
+      <div class="cx__body">
+        <nav class="cx__tree mono" aria-label="Files">
+          {[...groups].map(([dir, list]) => (
+            <div class="cx__group">
+              {dir && <p class="cx__dir">▾ {dir}/</p>}
+              <ul>
+                {list.map((f, i) => (
+                  <li>
+                    <button
+                      type="button"
+                      class:list={['cx__file', { 'is-active': f === files[0] }]}
+                      data-file={rel(f.path)}
+                      aria-pressed={f === files[0] ? 'true' : 'false'}
+                    >
+                      <span class:list={['cx__icon', f.lang]}>{f.lang === 'json' ? '{}' : 'JS'}</span>
+                      {f.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+        <div class="cx__panes">
+          {files.map((f) => (
+            <section class="cx__pane" data-pane={rel(f.path)} hidden={f !== files[0]}>
+              <header class="cx__head mono">
+                <span class="cx__path">
+                  <span class="muted">{root}/</span>
+                  {rel(f.path)}
+                </span>
+                <span class="cx__meta">{lines(f.code)} lines</span>
+                <button type="button" class="cx__copy" data-copy-code>
+                  copy
+                </button>
+              </header>
+              <Code code={f.code} lang={f.lang as 'js' | 'json'} theme="github-dark-default" class="cx__code" />
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .cx {
+    scroll-margin-top: 80px;
+  }
+  .cx__body {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    min-height: 420px;
+  }
+  .cx__tree {
+    border-right: 1px solid var(--border);
+    padding: 12px 8px;
+    font-size: 13px;
+    max-height: 640px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.01);
+  }
+  .cx__group + .cx__group {
+    margin-top: 10px;
+  }
+  .cx__dir {
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .cx__group:has(.cx__dir) ul {
+    padding-left: 12px;
+  }
+  .cx__tree ul {
+    list-style: none;
+    padding: 0;
+  }
+  .cx__file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  .cx__file:hover {
+    color: var(--text-hi);
+    background: var(--surface-2);
+  }
+  .cx__file.is-active {
+    color: var(--text-hi);
+    background: rgba(74, 222, 128, 0.1);
+    box-shadow: inset 2px 0 0 var(--green);
+  }
+  .cx__icon {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    width: 20px;
+    text-align: center;
+    color: var(--amber);
+  }
+  .cx__icon.json {
+    color: var(--cyan);
+  }
+  .cx__panes {
+    min-width: 0;
+  }
+  .cx__pane {
+    animation: pane-in 0.35s var(--ease);
+  }
+  @keyframes pane-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  .cx__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .cx__path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-hi);
+  }
+  .cx__meta {
+    color: var(--dim);
+  }
+  .cx__copy {
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .cx__copy:hover,
+  .cx__copy.is-done {
+    color: var(--green);
+  }
+  .cx :global(.cx__code) {
+    margin: 0;
+    padding: 16px 18px;
+    max-height: 600px;
+    overflow: auto;
+    background: transparent !important;
+    font-size: 13px;
+    line-height: 1.65;
+    font-family: var(--font-mono);
+  }
+  .cx :global(.cx__code code) {
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 760px) {
+    .cx__body {
+      grid-template-columns: 1fr;
+    }
+    .cx__tree {
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+      max-height: 180px;
+    }
+  }
+</style>
