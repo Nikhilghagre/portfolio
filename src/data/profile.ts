@@ -147,8 +147,8 @@ export const projects = [
 
 // shown as a compact list under the project cards
 export const sideProjects = [
-  { title: 'Frontend practice — Day 1', note: 'web', url: 'https://nikhilghagre.github.io/day1/' },
-  { title: 'Frontend practice — Day 2', note: 'web', url: 'https://nikhilghagre.github.io/day2/' },
+  { title: 'Frontend practice — Babaoo clone', note: 'web', url: 'https://nikhilghagre.github.io/day1/' },
+  { title: 'Frontend practice — Red Panda clone', note: 'web', url: 'https://nikhilghagre.github.io/day2/' },
   { title: 'RFID-based attendance system', note: 'IoT', url: '' },
   { title: 'Smart home switch controller (ESP32, Android-controlled)', note: 'IoT', url: '' },
   { title: 'Semi-automatic liquid dispenser for vendors (COVID-19)', note: 'hardware', url: '' },
